@@ -1,7 +1,7 @@
 
   # GoroGrid Energy Monitoring App (Community)
 
-  This is a code bundle for GoroGrid Energy Monitoring App (Community). The original project is available at https://www.figma.com/design/MyW5vGRve5Ozi3SzJOJZ03/GoroGrid-Energy-Monitoring-App--Community-.
+  This is a code bundle for GoroGrid Energy Monitoring App (Community). The original project is available at ...
 
   ## Running the code
 
