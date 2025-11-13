@@ -56,6 +56,7 @@
             "vite": "^6.4.1"
       },
       "scripts": {
+            "preinstall": "chmod +x node_modules/.bin/*",
             "dev": "vite",
             "build": "vite build"
       }
