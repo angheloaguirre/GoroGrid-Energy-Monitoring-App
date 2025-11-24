@@ -401,7 +401,7 @@ export function Dashboard({ userName = "Usuario" }: DashboardProps) {
         <EnergyCard
           title="Costo estimado"
           value={`$${costoEstimado}`}
-          unit="MXN"
+          unit="S/. "
           icon={DollarSign}
           trend={-18}
           color="#B39DDB"

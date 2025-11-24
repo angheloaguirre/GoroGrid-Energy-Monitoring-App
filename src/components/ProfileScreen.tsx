@@ -302,7 +302,7 @@ export function ProfileScreen({ userName = "Usuario", userEmail = "usuario@gorog
         <Card className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <Label htmlFor="tarifa_kwh">Tarifa kWh (MXN)</Label>
+              <Label htmlFor="tarifa_kwh">Tarifa kWh (S/.)</Label>
               <div className="flex items-center gap-2 mt-1">
                 <DollarSign className="w-5 h-5 text-[#7C4DFF]" />
                 <Input
