@@ -5,9 +5,12 @@ import { LucideIcon } from "lucide-react";
 interface EnergyCardProps {
   title: string;
   value: string;
-  unit: string;
+  unit?: string;
   icon: LucideIcon;
+  // trend queda para compatibilidad pero ya no se muestra
   trend?: number;
+  // NUEVO: texto libre tipo "Mejorando", "Sin cambios", etc.
+  trendLabel?: string;
   color?: string;
   delay?: number;
 }
@@ -17,7 +20,7 @@ export function EnergyCard({
   value,
   unit,
   icon: Icon,
-  trend,
+  trendLabel,
   color = "#4CAF50",
   delay = 0,
 }: EnergyCardProps) {
@@ -35,22 +38,23 @@ export function EnergyCard({
               <span className="text-[2rem] leading-none" style={{ color }}>
                 {value}
               </span>
-              <span className="text-muted-foreground">{unit}</span>
+              {unit && (
+                <span className="text-muted-foreground">{unit}</span>
+              )}
             </div>
-            {trend !== undefined && (
+
+            {trendLabel && (
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: delay + 0.3 }}
-                className={`mt-2 ${
-                  trend < 0 ? "text-[#4CAF50]" : "text-[#f44336]"
-                }`}
+                className="mt-2 text-[#4CAF50]"
               >
-                {trend > 0 ? "+" : ""}
-                {trend}% vs mes anterior
+                {trendLabel}
               </motion.p>
             )}
           </div>
+
           <motion.div
             whileHover={{ scale: 1.1, rotate: 5 }}
             className="p-3 rounded-xl"
