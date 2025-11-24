@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EnergyCard } from "./EnergyCard";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
@@ -43,6 +43,16 @@ interface DashboardProps {
   userName?: string;
 }
 
+interface DashboardMetrics {
+  consumoActualKwh: number;
+  consumoTrend: number;
+  emisionesKg: number;
+  emisionesTrend: number;
+  costoMxn: number;
+  costoTrend: number;
+  weekly: { time: string; kwh: number }[];
+}
+
 interface SensorData {
   datetime: string;
   z1_temp: string;
@@ -78,6 +88,40 @@ export function Dashboard({ userName = "Usuario" }: DashboardProps) {
 
   const [prediction, setPrediction] = useState<number | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+  const [weeklyData, setWeeklyData] = useState<{ time: string; kwh: number }[]>(mockData);
+
+  // Cargar métricas reales del backend (CSV -> /dashboard-metrics)
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/dashboard-metrics");
+        if (!res.ok) throw new Error("Error al obtener métricas del dashboard");
+
+        const data = await res.json();
+
+        const newMetrics: DashboardMetrics = {
+          consumoActualKwh: data.consumo_actual_kwh,
+          consumoTrend: data.consumo_vs_mes_anterior_pct,
+          emisionesKg: data.emisiones_actual_kg,
+          emisionesTrend: data.emisiones_vs_mes_anterior_pct,
+          costoMxn: data.costo_actual_mxn,
+          costoTrend: data.costo_vs_mes_anterior_pct,
+          weekly: data.weekly ?? [],
+        };
+
+        setMetrics(newMetrics);
+
+        if (data.weekly) {
+          setWeeklyData(data.weekly);
+        }
+      } catch (error) {
+        console.error("Error cargando métricas del dashboard:", error);
+      }
+    };
+
+    fetchMetrics();
+  }, []);
 
   // Obtener preferencias del usuario
   const getPreferences = () => {
@@ -135,13 +179,17 @@ export function Dashboard({ userName = "Usuario" }: DashboardProps) {
         },
       };
 
-      const response = await fetch("https://gorogrid-backend-ceembfhbdkfabahz.brazilsouth-01.azurewebsites.net/predict", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestData),
-      });
+      // 🔗 Predicción contra la API desplegada en Azure
+      const response = await fetch(
+        "https://gorogrid-backend-ceembfhbdkfabahz.brazilsouth-01.azurewebsites.net/predict",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestData),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Error al comunicarse con la API");
@@ -163,10 +211,27 @@ export function Dashboard({ userName = "Usuario" }: DashboardProps) {
     }
   };
 
-  // Calcular valores con la predicción
-  const consumoActual = prediction !== null ? prediction.toFixed(2) : "3.2";
-  const emisionesCO2 = prediction !== null ? (prediction * co2_factor).toFixed(2) : "0.75";
-  const costoEstimado = prediction !== null ? (prediction * tarifa_kwh).toFixed(2) : "0.80";
+  // Calcular valores con la predicción o con métricas del backend
+  const consumoActual =
+    prediction !== null
+      ? prediction.toFixed(2)
+      : metrics
+      ? metrics.consumoActualKwh.toFixed(2)
+      : "—";
+
+  const emisionesCO2 =
+    prediction !== null
+      ? (prediction * co2_factor).toFixed(2)
+      : metrics
+      ? metrics.emisionesKg.toFixed(2)
+      : "—";
+
+  const costoEstimado =
+    prediction !== null
+      ? (prediction * tarifa_kwh).toFixed(2)
+      : metrics
+      ? metrics.costoMxn.toFixed(2)
+      : "—";
 
   return (
     <div className="space-y-6">
@@ -385,7 +450,7 @@ export function Dashboard({ userName = "Usuario" }: DashboardProps) {
           value={consumoActual}
           unit="kWh"
           icon={Zap}
-          trend={-15}
+          trendLabel="Mejorando"
           color="#7C4DFF"
           delay={0.2}
         />
@@ -394,16 +459,16 @@ export function Dashboard({ userName = "Usuario" }: DashboardProps) {
           value={emisionesCO2}
           unit="kg"
           icon={Leaf}
-          trend={-23}
+          trendLabel="Mejorando"
           color="#9575CD"
           delay={0.3}
         />
         <EnergyCard
           title="Costo estimado"
-          value={`S/.${costoEstimado}`}
-          unit="PEN"
+          value={`S/ ${costoEstimado}`}
+          unit=""
           icon={DollarSign}
-          trend={-18}
+          trendLabel="Mejorando"
           color="#B39DDB"
           delay={0.4}
         />
@@ -419,14 +484,12 @@ export function Dashboard({ userName = "Usuario" }: DashboardProps) {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="mb-1">Uso de electricidad semanal</h3>
-              <p className="text-muted-foreground">
-                Últimos 7 días
-              </p>
+              <p className="text-muted-foreground">Últimos 7 días</p>
             </div>
           </div>
 
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={mockData}>
+            <AreaChart data={weeklyData}>
               <defs>
                 <linearGradient id="colorKwh" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#7C4DFF" stopOpacity={0.3} />
@@ -457,7 +520,7 @@ export function Dashboard({ userName = "Usuario" }: DashboardProps) {
         </Card>
       </motion.div>
 
-      {/* Resumen rápido */}
+      {/* Resumen rápido (mock por ahora) */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
