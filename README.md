@@ -40,11 +40,13 @@ Para ejecutar este proyecto, necesitas tener instalado:
 
    ```bash
    git clone https://github.com/tu-usuario/GoroGrid-Energy-Monitoring-App.git
+   ```
 
 2. Navega al directorio del proyecto:
 
   ```bash
   cd GoroGrid-Energy-Monitoring-App
+   ```
 
 3. Navega al directorio del proyecto:
 
