@@ -46,21 +46,24 @@ Para ejecutar este proyecto, necesitas tener instalado:
 
   ```bash
   cd GoroGrid-Energy-Monitoring-App
-   ```
+  ```
 
 3. Navega al directorio del proyecto:
 
   ```bash
   cd GoroGrid-Energy-Monitoring-App
+  ```
 
 4. Instala las dependencias:
 
   ```bash
   npm install
+  ```
 
 5. Inicia el servidor de desarrollo:
 
   ```bash
   npm run dev
+  ```
 
 Abre tu navegador y visita **http://localhost:3000** para ver la aplicación en acción.
