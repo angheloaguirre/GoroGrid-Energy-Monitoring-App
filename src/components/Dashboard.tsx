@@ -39,6 +39,10 @@ const mockData = [
   { time: "Dom", kwh: 3.2 },
 ];
 
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  "https://gorogrid-backend-ceembfhbdkfabahz.brazilsouth-01.azurewebsites.net";
+
 interface DashboardProps {
   userName?: string;
 }
@@ -95,7 +99,7 @@ export function Dashboard({ userName = "Usuario" }: DashboardProps) {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/dashboard-metrics");
+        const res = await fetch(`${API_BASE}/dashboard-metrics`);
         if (!res.ok) throw new Error("Error al obtener métricas del dashboard");
 
         const data = await res.json();
@@ -179,17 +183,14 @@ export function Dashboard({ userName = "Usuario" }: DashboardProps) {
         },
       };
 
-      // 🔗 Predicción contra la API desplegada en Azure
-      const response = await fetch(
-        "https://gorogrid-backend-ceembfhbdkfabahz.brazilsouth-01.azurewebsites.net/predict",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestData),
-        }
-      );
+      // Predicción contra la API desplegada en Azure
+      const response = await fetch(`${API_BASE}/predict`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      });
 
       if (!response.ok) {
         throw new Error("Error al comunicarse con la API");
